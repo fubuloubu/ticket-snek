@@ -2,7 +2,7 @@
 # 1. Create an event
 # 2. Someone can buy a ticket
 
-NUMBER_OF_TICKETS: constant(uint256) = 5
+NUMBER_OF_TICKETS: constant(uint256) = 7
 
 name: public(string[64])
 tickets: public(address[NUMBER_OF_TICKETS])
