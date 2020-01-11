@@ -11,5 +11,5 @@ def test_buy_tickets(accounts, TicketSnek):
         snek.buy({'from': a})
         assert snek.tickets(i) == a
 
-    with pytest.reverts("Index out of range"):
+    with pytest.reverts():
         snek.buy({'from': accounts[7]})
