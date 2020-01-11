@@ -11,8 +11,14 @@ def test_buy_tickets(accounts, TicketSnek):
     for i, a in enumerate(accounts[:7]):
         before_funds = snek.balance()
         snek.buy({'from': a, 'value': snek.price()})
-        assert snek.tickets(i) == a
+        assert snek.has_ticket(a)
         assert snek.balance() - before_funds == snek.price()
 
     with pytest.reverts("dev: All tickets sold!"):
         snek.buy({'from': accounts[7]})
+
+def test_cannot_buy_two_tickets(accounts, TicketSnek):
+    snek = accounts[0].deploy(TicketSnek, "My new event!", 5, 100)
+    snek.buy({'from': accounts[0]})
+    with pytest.reverts("dev: You already bought a ticket!"):
+        snek.buy({'from': accounts[0]})

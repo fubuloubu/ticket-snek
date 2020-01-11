@@ -3,12 +3,14 @@
 # 2. Someone can buy a ticket
 # 3. There are a limited number of tickets
 # 4. Each ticket has a specific price
+# 5. A user can only buy one ticket
+
 
 
 name: public(string[64])
-tickets: public(map(uint256, address))
+has_ticket: public(map(address, bool))
 number_of_tickets: public(uint256)
-last_ticket_sold: uint256
+tickets_sold: public(uint256)
 
 price: public(uint256(wei))
 
@@ -17,13 +19,14 @@ price: public(uint256(wei))
 def __init__(_name: string[64], _tickets: uint256, _price: uint256(wei)):
     self.name = _name
     self.number_of_tickets = _tickets
-    self.last_ticket_sold = 0
+    self.tickets_sold = 0
     self.price = _price
 
 
 @public
 @payable
 def buy():
-    assert self.last_ticket_sold < self.number_of_tickets  # dev: All tickets sold!
-    self.tickets[self.last_ticket_sold] = msg.sender
-    self.last_ticket_sold += 1
+    assert self.tickets_sold < self.number_of_tickets  # dev: All tickets sold!
+    assert not self.has_ticket[msg.sender]  # dev: You already bought a ticket!
+    self.has_ticket[msg.sender] = True
+    self.tickets_sold += 1
