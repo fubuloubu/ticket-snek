@@ -6,8 +6,16 @@ NUMBER_OF_TICKETS: constant(uint256) = 5
 
 name: public(string[64])
 tickets: public(address[NUMBER_OF_TICKETS])
+last_ticket_sold: uint256
 
 
 @public
 def __init__(_name: string[64]):
     self.name = _name
+    self.last_ticket_sold = 0
+
+
+@public
+def buy():
+    self.tickets[self.last_ticket_sold] = msg.sender
+    self.last_ticket_sold += 1
