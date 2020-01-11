@@ -22,3 +22,12 @@ def test_cannot_buy_two_tickets(accounts, TicketSnek):
     snek.buy({'from': accounts[0]})
     with pytest.reverts("dev: You already bought a ticket!"):
         snek.buy({'from': accounts[0]})
+
+def test_withdraw_money(accounts, TicketSnek):
+    snek = accounts[0].deploy(TicketSnek, "My new event!", 5, 100)
+    for a in accounts[:5]:
+        snek.buy({'from': a, 'value': snek.price()})
+
+    assert snek.balance() == 5 * snek.price()
+    snek.withdraw({'from': accounts[5]})
+    assert snek.balance() == 0

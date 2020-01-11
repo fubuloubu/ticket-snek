@@ -30,3 +30,8 @@ def buy():
     assert not self.has_ticket[msg.sender]  # dev: You already bought a ticket!
     self.has_ticket[msg.sender] = True
     self.tickets_sold += 1
+
+
+@public
+def withdraw():
+    selfdestruct(msg.sender)
