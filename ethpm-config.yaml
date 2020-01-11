@@ -1,25 +1,16 @@
 # Brownie ethPM package configuration file
-# https://eth-brownie.readthedocs.io/en/stable/ethpm.html
 
-# required fields
-package_name:
-version:
-settings:
-  deployment_networks:
-    -
-    -
-  include_dependencies:
+package_name: ticket-snek
+version: 0.1.0-alpha.1
 
-# optional fields
 meta:
-  description:
+  description: Ticketmaster, but on the blockchain
   authors:
-    -
-    -
-  license:
+    - @fubuloubu
+  license: MIT
   keywords:
-    -
-    -
+    - Tickets
+    - Sneks
   links:
     website:
     documentation:
