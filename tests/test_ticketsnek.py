@@ -37,6 +37,10 @@ def test_cannot_buy_two_tickets(accounts, snek):
 def test_withdraw_money(accounts, snek):
     test_buy_tickets(accounts, snek)  # Start from end of this test
 
+    with pytest.reverts("dev: Must be Snek Charmer!"):
+        snek.withdraw({'from': accounts[5]})
+
+
     assert snek.balance() == 5 * snek.price()
-    snek.withdraw({'from': accounts[5]})
+    snek.withdraw({'from': accounts[0]})
     assert snek.balance() == 0
