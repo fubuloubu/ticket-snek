@@ -19,6 +19,6 @@ def __init__(_name: string[64], _tickets: uint256):
 
 @public
 def buy():
-    assert self.last_ticket_sold < self.number_of_tickets
+    assert self.last_ticket_sold < self.number_of_tickets  # dev: All tickets sold!
     self.tickets[self.last_ticket_sold] = msg.sender
     self.last_ticket_sold += 1
