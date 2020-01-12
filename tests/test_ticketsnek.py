@@ -45,6 +45,24 @@ def test_cannot_buy_two_tickets(accounts, snek):
     with pytest.reverts("dev: You already bought a ticket!"):
         snek.buy({'from': accounts[0], 'value': snek.price()})
 
+def test_can_get_refund(accounts, snek):
+    snek.buy({'from': accounts[0], 'value': snek.price()})
+
+    with pytest.reverts("dev: You don't have a ticket!"):
+        snek.refund({'from': accounts[1]})
+
+    assert snek.tickets_sold() == 1
+    snek.refund({'from': accounts[0]})
+    assert snek.tickets_sold() == 0
+
+def test_cant_refund_after_period_ends(rpc, accounts, snek):
+    snek.buy({'from': accounts[0], 'value': snek.price()})
+
+    rpc.sleep(FIVE_SECONDS)
+
+    with pytest.reverts("dev: Refund window has closed!"):
+        snek.refund({'from': accounts[0]})
+
 def test_withdraw_money(accounts, snek):
     test_buy_tickets(accounts, snek)  # Start from end of this test
 
