@@ -3,12 +3,12 @@ import pytest
 EVENT_NAME = "My new event!"
 NUMBER_TICKETS = 5
 TICKET_PRICE = 100  # wei
-FIVE_SECONDS = 5
-SNEK_ARGS = [EVENT_NAME, NUMBER_TICKETS, TICKET_PRICE, FIVE_SECONDS]
+REFUND_WINDOW = 5 * 24 * 60 * 60  # 5 days (in seconds)
+SNEK_ARGS = [EVENT_NAME, NUMBER_TICKETS, TICKET_PRICE, REFUND_WINDOW]
 
 
 def test_deploy(rpc, accounts, TicketSnek):
-    snek = accounts[0].deploy(TicketSnek, *SNEK_ARGS, rpc.time() + FIVE_SECONDS)
+    snek = accounts[0].deploy(TicketSnek, *SNEK_ARGS, rpc.time() + REFUND_WINDOW)
     assert snek.name() == EVENT_NAME
     assert snek.number_of_tickets() == NUMBER_TICKETS
     assert snek.price() == TICKET_PRICE
@@ -16,7 +16,7 @@ def test_deploy(rpc, accounts, TicketSnek):
 
 @pytest.fixture(scope='module', autouse=True)
 def snek(rpc, accounts, TicketSnek):
-    yield accounts[0].deploy(TicketSnek, *SNEK_ARGS, rpc.time() + FIVE_SECONDS)
+    yield accounts[0].deploy(TicketSnek, *SNEK_ARGS, rpc.time() + REFUND_WINDOW)
 
 
 @pytest.fixture(autouse=True)
@@ -46,7 +46,7 @@ def test_cannot_buy_two_tickets(accounts, snek):
         snek.buy({'from': accounts[0], 'value': snek.price()})
 
 def test_cant_buy_after_event_starts(rpc, accounts, snek):
-    rpc.sleep(FIVE_SECONDS)
+    rpc.sleep(REFUND_WINDOW)
 
     with pytest.reverts("dev: Cannot buy tickets after the event started!"):
         snek.buy({'from': accounts[0], 'value': snek.price()})
@@ -65,7 +65,7 @@ def test_can_get_refund(accounts, snek):
 def test_cant_refund_after_period_ends(rpc, accounts, snek):
     snek.buy({'from': accounts[0], 'value': snek.price()})
 
-    rpc.sleep(FIVE_SECONDS)
+    rpc.sleep(REFUND_WINDOW)
 
     with pytest.reverts("dev: Refund window has closed!"):
         snek.refund({'from': accounts[0]})
@@ -79,7 +79,7 @@ def test_withdraw_money(rpc, accounts, snek):
     with pytest.reverts("dev: Event hasn't settled yet!"):
         snek.withdraw({'from': accounts[0]})
 
-    rpc.sleep(FIVE_SECONDS + 7 * 24 * 60 * 60)
+    rpc.sleep(REFUND_WINDOW + 7 * 24 * 60 * 60)
 
     assert snek.balance() == NUMBER_TICKETS * snek.price()
     snek.withdraw({'from': accounts[0]})
