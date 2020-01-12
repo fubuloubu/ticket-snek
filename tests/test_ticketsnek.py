@@ -1,15 +1,22 @@
 import pytest
 
+EVENT_NAME = "My new event!"
+NUMBER_TICKETS = 5
+TICKET_PRICE = 100  # wei
+FIVE_SECONDS = 5
+SNEK_ARGS = [EVENT_NAME, NUMBER_TICKETS, TICKET_PRICE, FIVE_SECONDS]
+
+
 def test_deploy(accounts, TicketSnek):
-    snek = accounts[0].deploy(TicketSnek, "My new event!", 5, 100)
-    assert snek.name() == "My new event!"
-    assert snek.number_of_tickets() == 5
-    assert snek.price() == 100
+    snek = accounts[0].deploy(TicketSnek, *SNEK_ARGS)
+    assert snek.name() == EVENT_NAME
+    assert snek.number_of_tickets() == NUMBER_TICKETS
+    assert snek.price() == TICKET_PRICE
 
 
 @pytest.fixture(scope='module', autouse=True)
 def snek(accounts, TicketSnek):
-    yield accounts[0].deploy(TicketSnek, "My new event!", 5, 100)
+    yield accounts[0].deploy(TicketSnek, *SNEK_ARGS)
 
 
 @pytest.fixture(autouse=True)
@@ -42,9 +49,9 @@ def test_withdraw_money(accounts, snek):
     test_buy_tickets(accounts, snek)  # Start from end of this test
 
     with pytest.reverts("dev: Must be Snek Charmer!"):
-        snek.withdraw({'from': accounts[5]})
+        snek.withdraw({'from': accounts[NUMBER_TICKETS]})
 
 
-    assert snek.balance() == 5 * snek.price()
+    assert snek.balance() == NUMBER_TICKETS * snek.price()
     snek.withdraw({'from': accounts[0]})
     assert snek.balance() == 0
