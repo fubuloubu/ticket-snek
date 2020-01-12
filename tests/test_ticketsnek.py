@@ -45,6 +45,13 @@ def test_cannot_buy_two_tickets(accounts, snek):
     with pytest.reverts("dev: You already bought a ticket!"):
         snek.buy({'from': accounts[0], 'value': snek.price()})
 
+def test_cant_buy_after_event_starts(rpc, accounts, snek):
+    rpc.sleep(FIVE_SECONDS)
+
+    with pytest.reverts("dev: Cannot buy tickets after the event started!"):
+        snek.buy({'from': accounts[0], 'value': snek.price()})
+
+
 def test_can_get_refund(accounts, snek):
     snek.buy({'from': accounts[0], 'value': snek.price()})
 

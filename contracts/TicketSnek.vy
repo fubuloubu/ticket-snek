@@ -44,6 +44,7 @@ def __init__(
 @public
 @payable
 def buy():
+    assert block.timestamp < self.event_date  # dev: Cannot buy tickets after the event started!
     assert msg.value == self.price  # dev: Must send exactly the price of a ticket!
     assert self.tickets_sold < self.number_of_tickets  # dev: All tickets sold!
     assert not self.has_ticket[msg.sender]  # dev: You already bought a ticket!
