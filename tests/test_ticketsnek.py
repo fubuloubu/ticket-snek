@@ -1,22 +1,26 @@
 import pytest
+import time
 
 EVENT_NAME = "My new event!"
 NUMBER_TICKETS = 5
 TICKET_PRICE = 100  # wei
 REFUND_WINDOW = 5 * 24 * 60 * 60  # 5 days (in seconds)
-SNEK_ARGS = [EVENT_NAME, NUMBER_TICKETS, TICKET_PRICE, REFUND_WINDOW]
+ONE_WEEK = 7 * 24 * 60 * 60  # 7 days (in seconds)
+EVENT_DATE = int(time.time()) + ONE_WEEK  # event starts 1 week from today (using system time)
+SNEK_ARGS = [EVENT_NAME, NUMBER_TICKETS, TICKET_PRICE, REFUND_WINDOW, EVENT_DATE]
 
 
 def test_deploy(rpc, accounts, TicketSnek):
-    snek = accounts[0].deploy(TicketSnek, *SNEK_ARGS, rpc.time() + REFUND_WINDOW)
+    snek = accounts[0].deploy(TicketSnek, *SNEK_ARGS)
     assert snek.name() == EVENT_NAME
+    assert snek.event_date() == EVENT_DATE
     assert snek.number_of_tickets() == NUMBER_TICKETS
     assert snek.price() == TICKET_PRICE
 
 
 @pytest.fixture(scope='module', autouse=True)
 def snek(rpc, accounts, TicketSnek):
-    yield accounts[0].deploy(TicketSnek, *SNEK_ARGS, rpc.time() + REFUND_WINDOW)
+    yield accounts[0].deploy(TicketSnek, *SNEK_ARGS)
 
 
 @pytest.fixture(autouse=True)
@@ -46,7 +50,7 @@ def test_cannot_buy_two_tickets(accounts, snek):
         snek.buy({'from': accounts[0], 'value': snek.price()})
 
 def test_cant_buy_after_event_starts(rpc, accounts, snek):
-    rpc.sleep(REFUND_WINDOW)
+    rpc.sleep(ONE_WEEK)
 
     with pytest.reverts("dev: Cannot buy tickets after the event started!"):
         snek.buy({'from': accounts[0], 'value': snek.price()})
@@ -76,10 +80,12 @@ def test_withdraw_money(rpc, accounts, snek):
     with pytest.reverts("dev: Must be Snek Charmer!"):
         snek.withdraw({'from': accounts[NUMBER_TICKETS]})
 
+    rpc.sleep(ONE_WEEK)  # Fast forward to event start
+
     with pytest.reverts("dev: Event hasn't settled yet!"):
         snek.withdraw({'from': accounts[0]})
 
-    rpc.sleep(REFUND_WINDOW + 7 * 24 * 60 * 60)
+    rpc.sleep(ONE_WEEK)  # Must wait until event settles
 
     assert snek.balance() == NUMBER_TICKETS * snek.price()
     snek.withdraw({'from': accounts[0]})
