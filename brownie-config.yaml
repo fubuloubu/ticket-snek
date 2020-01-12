@@ -37,7 +37,7 @@ pytest:
     reverting_tx_gas_limit: 6721975
     revert_traceback: false
 compiler:
-    vyper:
+    solc:
         version: null
         evm_version: null
         optimize: true
