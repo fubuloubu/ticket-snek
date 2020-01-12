@@ -29,6 +29,7 @@ def __init__(_name: string[64], _tickets: uint256, _price: uint256(wei)):
 @public
 @payable
 def buy():
+    assert msg.value == self.price  # dev: Must send exactly the price of a ticket!
     assert self.tickets_sold < self.number_of_tickets  # dev: All tickets sold!
     assert not self.has_ticket[msg.sender]  # dev: You already bought a ticket!
     self.has_ticket[msg.sender] = True

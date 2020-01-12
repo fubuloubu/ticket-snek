@@ -23,16 +23,20 @@ def test_buy_tickets(accounts, snek):
         assert snek.has_ticket(a)
         assert snek.balance() - before_funds == snek.price()
 
+def test_must_send_right_price(accounts, snek):
+    with pytest.reverts("dev: Must send exactly the price of a ticket!"):
+        snek.buy({'from': accounts[0], 'value': snek.price()+1})
+
 def test_overbuy(accounts, snek):
     test_buy_tickets(accounts, snek)  # Start from end of this test
 
     with pytest.reverts("dev: All tickets sold!"):
-        snek.buy({'from': accounts[snek.number_of_tickets()]})
+        snek.buy({'from': accounts[snek.number_of_tickets()], 'value': snek.price()})
 
 def test_cannot_buy_two_tickets(accounts, snek):
-    snek.buy({'from': accounts[0]})
+    snek.buy({'from': accounts[0], 'value': snek.price()})
     with pytest.reverts("dev: You already bought a ticket!"):
-        snek.buy({'from': accounts[0]})
+        snek.buy({'from': accounts[0], 'value': snek.price()})
 
 def test_withdraw_money(accounts, snek):
     test_buy_tickets(accounts, snek)  # Start from end of this test
